@@ -1,0 +1,21 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <h1>Verify Email</h1>
+    <form (ngSubmit)="onSubmit()" #signinForm="ngForm">
+      <div class="form-group">
+        <label for="code">Code</label>
+        <input
+          type="text"
+          id="code"
+          name="code"
+          [(ngModel)]="credentials.code"
+          required
+          minlength="6"
+          placeholder="Enter your code"
+        />
+      </div>
+
+      <button type="submit" [disabled]="!signinForm.form.valid">Verify</button>
+    </form>
+  </div>
+</div>
