@@ -1,0 +1,76 @@
+<div class="dashboard">
+  <nav class="navbar">
+    <div class="nav-content">
+      <h2>Dashboard</h2>
+      <div class="nav-right">
+        <span class="user-name">{{ userName }}</span>
+        <button (click)="logout()" class="logout-btn">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dashboard-content">
+    <div class="welcome-section">
+      <h1>Welcome back, {{ userName }}!</h1>
+      <p>{{ userEmail }}</p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon" style="background: #667eea">📊</div>
+        <h3>Total Projects</h3>
+        <p class="stat-number">12</p>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon" style="background: #48bb78">✓</div>
+        <h3>Completed Tasks</h3>
+        <p class="stat-number">48</p>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon" style="background: #ed8936">⏰</div>
+        <h3>Pending Tasks</h3>
+        <p class="stat-number">15</p>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon" style="background: #e53e3e">🎯</div>
+        <h3>Goals</h3>
+        <p class="stat-number">6</p>
+      </div>
+    </div>
+
+    <div class="recent-activity">
+      <h2>Recent Activity</h2>
+      <div class="activity-list">
+        <div class="activity-item">
+          <div class="activity-dot"></div>
+          <div class="activity-content">
+            <h4>Project Created</h4>
+            <p>New project "Website Redesign" has been created</p>
+            <span class="activity-time">2 hours ago</span>
+          </div>
+        </div>
+
+        <div class="activity-item">
+          <div class="activity-dot"></div>
+          <div class="activity-content">
+            <h4>Task Completed</h4>
+            <p>Finished implementing authentication system</p>
+            <span class="activity-time">5 hours ago</span>
+          </div>
+        </div>
+
+        <div class="activity-item">
+          <div class="activity-dot"></div>
+          <div class="activity-content">
+            <h4>Team Meeting</h4>
+            <p>Weekly standup meeting scheduled for tomorrow</p>
+            <span class="activity-time">1 day ago</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
