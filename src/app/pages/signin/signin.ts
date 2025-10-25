@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { signIn } from 'aws-amplify/auth';
 
 @Component({
   selector: 'app-signin',
@@ -18,12 +19,22 @@ export class Signin {
 
   constructor(private router: Router) {}
 
-  onSubmit() {
-    // Store user session (in a real app, validate with backend)
-    localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('userEmail', this.credentials.email);
+  async onSubmit() {
+    try {
+      console.log(this.credentials);
+
+      await signIn({
+        username: this.credentials.email,
+        password: this.credentials.password,
+      });
+
+      // this.toastr.success('Sign-in successful', 'Done');
+      this.router.navigate(['/dashboard']);
+    } catch (error) {
+      // this.toastr.error('Sign-in failed', 'Error');
+      // this.loading = false;
+    }
 
     // Navigate to dashboard
-    this.router.navigate(['/dashboard']);
   }
 }
