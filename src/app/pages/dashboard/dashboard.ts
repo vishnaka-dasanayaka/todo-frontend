@@ -1,10 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { signOut } from 'aws-amplify/auth';
+import { TaskService } from '../../services/task.service';
+import { ToastrService } from 'ngx-toastr';
+import { UserService } from '../../services/user.service';
+import { Loader } from '../loader/loader';
 
 interface Activity {
+  id: number;
   title: string;
   description: string;
   createdAt: Date;
@@ -14,7 +19,7 @@ interface Activity {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, Loader],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.css'],
 })
@@ -24,68 +29,154 @@ export class Dashboard implements OnInit {
 
   activities: Activity[] = [];
 
+  updateMode = false;
+  id_for_edit?: number;
   newTask = { title: '', description: '' };
 
-  constructor(private router: Router) {}
+  totalCount: number = 0;
+  pendingCOunt: number = 0;
+  completedCount: number = 0;
+
+  LoadUI = false;
+
+  constructor(
+    private router: Router,
+    private taskService: TaskService,
+    private cd: ChangeDetectorRef,
+    private toastr: ToastrService,
+    private userService: UserService
+  ) {}
 
   ngOnInit() {
-    const isLoggedIn = localStorage.getItem('isLoggedIn');
-    if (!isLoggedIn) {
-      // this.router.navigate(['/signin']);
-      // return;
-    }
+    this.getData();
+  }
 
-    this.userName = localStorage.getItem('userName') || 'User';
-    this.userEmail = localStorage.getItem('userEmail') || '';
+  getData() {
+    this.LoadUI = false;
 
-    this.activities = [
-      {
-        title: 'Project Created',
-        description: 'New project "Website Redesign" has been created',
-        createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
-        completed: false,
+    this.taskService.getDashboardData().subscribe({
+      next: (data) => {
+        this.LoadUI = true;
+        this.totalCount = data.total;
+        this.pendingCOunt = data.pending;
+        this.completedCount = data.completed;
+        this.userName = data.name;
+        this.userEmail = data.email;
+        this.cd.detectChanges();
       },
-      {
-        title: 'Task Completed',
-        description: 'Finished implementing authentication system',
-        createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000),
-        completed: true,
+      error: (err) => {
+        console.error('Error loading data:', err);
+        this.LoadUI = true;
+        this.cd.detectChanges();
       },
-      {
-        title: 'Team Meeting',
-        description: 'Weekly standup meeting scheduled for tomorrow',
-        createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
-        completed: false,
+    });
+
+    this.taskService.getFiveTasks().subscribe({
+      next: (data) => {
+        this.activities = data;
+        this.cd.detectChanges();
+        this.LoadUI = true;
       },
-    ];
+      error: (err) => {
+        console.error('Error loading tasks:', err);
+        this.cd.detectChanges();
+      },
+    });
   }
 
   addTask() {
     if (!this.newTask.title || !this.newTask.description) return;
 
-    const task: Activity = {
+    const task = {
       title: this.newTask.title,
       description: this.newTask.description,
-      createdAt: new Date(),
-      completed: false,
     };
 
-    this.activities.unshift(task);
-    this.newTask = { title: '', description: '' };
+    this.taskService.createTask(task).subscribe({
+      next: (data) => {
+        this.getData();
+        this.toastr.success('', '', {
+          toastClass: 'small-toast',
+          positionClass: 'toast-top-right',
+          timeOut: 3000,
+          tapToDismiss: true,
+          progressBar: false,
+          closeButton: false,
+        });
+        this.newTask = { title: '', description: '' };
+      },
+      error: (err) => {
+        this.toastr.error('', '', {
+          toastClass: 'small-toast-err',
+          positionClass: 'toast-top-right',
+          timeOut: 3000,
+          tapToDismiss: true,
+          progressBar: false,
+          closeButton: false,
+        });
+        console.error(err);
+      },
+    });
   }
 
   async logout() {
     try {
       await signOut();
       localStorage.clear();
-      this.router.navigate(['/login']);
+      this.router.navigate(['/signin']);
     } catch (error) {
       console.error('Error during sign out:', error);
     }
   }
 
-  markAsCompleted(activity: Activity) {
-    activity.completed = true;
+  updateStatus(activity: Activity, status: string) {
+    this.taskService
+      .updateTaskStatus({ id: activity.id, status: status })
+      .subscribe((data) => {
+        this.getData();
+        this.toastr.success('', '', {
+          toastClass: 'small-toast',
+          positionClass: 'toast-top-right',
+          timeOut: 3000,
+          tapToDismiss: true,
+          progressBar: false,
+          closeButton: false,
+        });
+      });
+  }
+
+  onClickEdit(activity: Activity) {
+    this.updateMode = true;
+    this.id_for_edit = activity.id;
+    this.newTask = {
+      title: activity.title,
+      description: activity.description,
+    };
+  }
+
+  updateTask() {
+    if (!this.newTask.title || !this.newTask.description) return;
+
+    const task = {
+      id: this.id_for_edit,
+      title: this.newTask.title,
+      description: this.newTask.description,
+    };
+
+    this.taskService.updateTask(task).subscribe((data) => {
+      if (data) {
+        this.getData();
+        this.toastr.success('', '', {
+          toastClass: 'small-toast',
+          positionClass: 'toast-top-right',
+          timeOut: 3000,
+          tapToDismiss: true,
+          progressBar: false,
+          closeButton: false,
+        });
+        this.newTask = { title: '', description: '' };
+      }
+    });
   }
 
   getTimeAgo(date: Date): string {

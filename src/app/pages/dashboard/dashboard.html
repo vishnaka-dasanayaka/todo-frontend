@@ -15,8 +15,12 @@
     </div>
   </nav>
 
+  <div *ngIf="!LoadUI">
+    <app-loader></app-loader>
+  </div>
+
   <!-- Dashboard Content -->
-  <div class="max-w-6xl mx-auto px-5 py-10">
+  <div *ngIf="LoadUI" class="max-w-6xl mx-auto px-5 py-10">
     <div class="mb-10">
       <h1 class="text-3xl font-bold text-gray-800 mb-2">
         Welcome back, {{ userName }}!
@@ -35,9 +39,9 @@
           📊
         </div>
         <h3 class="text-sm font-medium text-gray-600 uppercase mb-1">
-          Total Projects
+          Total Tasks
         </h3>
-        <p class="text-3xl font-bold text-gray-800">12</p>
+        <p class="text-3xl font-bold text-gray-800">{{totalCount}}</p>
       </div>
 
       <div
@@ -52,7 +56,7 @@
         <h3 class="text-sm font-medium text-gray-600 uppercase mb-1">
           Completed Tasks
         </h3>
-        <p class="text-3xl font-bold text-gray-800">48</p>
+        <p class="text-3xl font-bold text-gray-800">{{completedCount}}</p>
       </div>
 
       <div
@@ -67,7 +71,7 @@
         <h3 class="text-sm font-medium text-gray-600 uppercase mb-1">
           Pending Tasks
         </h3>
-        <p class="text-3xl font-bold text-gray-800">15</p>
+        <p class="text-3xl font-bold text-gray-800">{{pendingCOunt}}</p>
       </div>
     </div>
 
@@ -75,7 +79,7 @@
     <div class="bg-white p-8 rounded-xl shadow mb-10">
       <h2 class="text-xl font-semibold text-gray-800 mb-6">Add New Task</h2>
 
-      <form (ngSubmit)="addTask()" #taskForm="ngForm" class="space-y-5">
+      <form #taskForm="ngForm" class="space-y-5">
         <div>
           <label class="block text-gray-700 font-medium mb-2">Task Title</label>
           <input
@@ -102,11 +106,23 @@
         </div>
 
         <button
-          type="submit"
+          *ngIf="!updateMode"
+          type="button"
           [disabled]="taskForm.invalid"
+          (click)="addTask()"
           class="px-6 py-3 bg-indigo-500 text-white rounded-md font-medium hover:bg-indigo-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Add Task
+        </button>
+
+        <button
+          *ngIf="updateMode"
+          type="button"
+          [disabled]="taskForm.invalid"
+          (click)="updateTask()"
+          class="px-6 py-3 bg-indigo-500 text-white rounded-md font-medium hover:bg-indigo-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Update Task
         </button>
       </form>
     </div>
@@ -146,13 +162,28 @@
                 {{ getTimeAgo(activity.createdAt) }}
               </span>
             </div>
-            <div>
+            <div class="flex flex-col justify-start items-end">
               <button
                 *ngIf="!activity.completed"
-                (click)="markAsCompleted(activity)"
-                class="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition"
+                (click)="updateStatus(activity,'COMPLETED')"
+                class="w-8 py-1 bg-green-500 text-white rounded hover:bg-green-600 transition"
               >
-                Mark as Completed
+                <i class="fa-solid fa-circle-check"></i>
+              </button>
+              <button
+                *ngIf="!activity.completed"
+                (click)="updateStatus(activity,'DELETED')"
+                class="w-8 py-1 bg-red-500 text-white rounded hover:bg-red-600 mt-1 transition"
+              >
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+
+              <button
+                *ngIf="!activity.completed"
+                (click)="onClickEdit(activity)"
+                class="w-8 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 mt-1 transition"
+              >
+                <i class="fa-solid fa-pen"></i>
               </button>
               <span
                 *ngIf="activity.completed"

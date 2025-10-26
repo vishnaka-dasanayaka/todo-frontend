@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { signIn } from 'aws-amplify/auth';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-signin',
@@ -17,24 +18,34 @@ export class Signin {
     password: '',
   };
 
-  constructor(private router: Router) {}
+  loading: boolean = false;
+
+  constructor(private router: Router, private toastr: ToastrService) {}
 
   async onSubmit() {
     try {
-      console.log(this.credentials);
-
+      this.loading = true;
       await signIn({
         username: this.credentials.email,
         password: this.credentials.password,
       });
 
+      this.loading = false;
+
       // this.toastr.success('Sign-in successful', 'Done');
       this.router.navigate(['/dashboard']);
     } catch (error) {
-      // this.toastr.error('Sign-in failed', 'Error');
-      // this.loading = false;
+      this.loading = false;
+      this.toastr.error('', '', {
+        toastClass: 'small-toast-err',
+        positionClass: 'toast-top-right',
+        timeOut: 3000,
+        tapToDismiss: true,
+        progressBar: false,
+        closeButton: false,
+      });
+    } finally {
+      this.loading = false;
     }
-
-    // Navigate to dashboard
   }
 }
