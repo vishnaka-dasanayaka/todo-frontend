@@ -10,27 +10,38 @@ import {
   getCurrentUser,
   resendSignUpCode,
 } from 'aws-amplify/auth';
+import { UserService } from '../../services/user.service';
+import { HttpClientModule } from '@angular/common/http';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-verify',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, HttpClientModule],
   templateUrl: './verify.html',
   styleUrl: './verify.css',
   standalone: true,
+  providers: [UserService],
 })
 export class Verify {
   credentials = {
     code: '',
   };
 
+  loading: boolean = false;
+
   email: any;
 
-  constructor(private router: Router) {
-    this.email = localStorage.getItem('email');
+  constructor(
+    private router: Router,
+    private userService: UserService,
+    private toastr: ToastrService
+  ) {
+    this.email = localStorage.getItem('pendingVerificationemail');
   }
 
   async onSubmit() {
     try {
+      this.loading = true;
       const { nextStep: confirmSignUpNextStep } = await confirmSignUp({
         username: this.email,
         confirmationCode: this.credentials.code,
@@ -41,26 +52,37 @@ export class Verify {
 
         if (nextStep.signInStep === 'DONE') {
           try {
-            // await this.userService.addUser().subscribe();
-            // this.toastr.success('Successfully signed in', 'Tada');
+            this.userService.createUser({}).subscribe((data) => {
+              this.loading = false;
+              this.router.navigate(['/dashboard']);
+            });
 
-            // await this.addRole();
-
-            this.router.navigate(['/dashboard']);
+            this.toastr.error('', '', {
+              toastClass: 'small-toast',
+              positionClass: 'toast-top-right',
+              timeOut: 3000,
+              tapToDismiss: true,
+              progressBar: false,
+              closeButton: false,
+            });
           } catch (userAddError) {
+            this.loading = false;
             console.error('Error adding user:', userAddError);
-            // this.toastr.warning(
-            //   'Signed in, but failed to register user',
-            //   'Tada'
-            // );
+            this.toastr.error('', '', {
+              toastClass: 'small-toast-err',
+              positionClass: 'toast-top-right',
+              timeOut: 3000,
+              tapToDismiss: true,
+              progressBar: false,
+              closeButton: false,
+            });
           }
         }
       }
     } catch (error: any) {
       console.error('Verification error:', error);
-      // this.toastr.error(error.message || 'Verification failed', 'Tada');
     } finally {
-      // this.loading = false;
+      this.loading = false;
     }
   }
 }

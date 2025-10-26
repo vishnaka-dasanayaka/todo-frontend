@@ -1,2 +1,72 @@
 /* You can add global styles to this file, and also import other style files */
 @import "tailwindcss";
+
+.small-toast {
+  background-color: #28a745 !important; /* green for success */
+  width: 60px !important;
+  height: 60px !important;
+  padding: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 50% !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25) !important;
+  min-height: auto !important;
+  margin: 12px !important;
+  font-size: 0 !important;
+  line-height: 1 !important;
+
+  animation: toastSlideIn 0.4s ease-out, toastBounce 0.6s ease-out 0.4s;
+  transform-origin: center;
+
+  background-image: none !important;
+  border: none !important;
+  color: transparent !important;
+}
+
+.small-toast:before {
+  content: "\2713";
+  font-size: 24px;
+  color: white;
+  font-weight: bold;
+  line-height: 1;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.small-toast-err {
+  background-color: red !important; /* green for success */
+  width: 60px !important;
+  height: 60px !important;
+  padding: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 50% !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25) !important;
+  min-height: auto !important;
+  margin: 12px !important;
+  font-size: 0 !important;
+  line-height: 1 !important;
+
+  animation: toastSlideIn 0.4s ease-out, toastBounce 0.6s ease-out 0.4s;
+  transform-origin: center;
+
+  background-image: none !important;
+  border: none !important;
+  color: transparent !important;
+}
+
+.small-toast-err:before {
+  content: "\2717";
+  font-size: 24px;
+  color: white;
+  font-weight: bold;
+  line-height: 1;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
