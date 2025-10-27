@@ -1,7 +1,7 @@
 export const env = {
   production: true,
-  baseUrl: 'http://localhost:8081/',
-  // baseUrl: 'https://ec2-3-108-60-193.ap-south-1.compute.amazonaws.com:8081/',
+  // baseUrl: 'http://localhost:8081/',
+  baseUrl: 'https://19hzwzr4rf.execute-api.ap-southeast-1.amazonaws.com/',
 
   cognito: {
     UserPoolId: 'ap-southeast-1_b3yobnSft',
